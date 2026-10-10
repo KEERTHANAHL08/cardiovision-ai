@@ -1,0 +1,122 @@
+{
+  "rows": 70000,
+  "columns": 13,
+  "column_names": [
+    "id",
+    "age",
+    "gender",
+    "height",
+    "weight",
+    "ap_hi",
+    "ap_lo",
+    "cholesterol",
+    "gluc",
+    "smoke",
+    "alco",
+    "active",
+    "cardio"
+  ],
+  "dtypes": {
+    "id": "int64",
+    "age": "int64",
+    "gender": "int64",
+    "height": "int64",
+    "weight": "float64",
+    "ap_hi": "int64",
+    "ap_lo": "int64",
+    "cholesterol": "int64",
+    "gluc": "int64",
+    "smoke": "int64",
+    "alco": "int64",
+    "active": "int64",
+    "cardio": "int64"
+  },
+  "missing_values": {
+    "id": 0,
+    "age": 0,
+    "gender": 0,
+    "height": 0,
+    "weight": 0,
+    "ap_hi": 0,
+    "ap_lo": 0,
+    "cholesterol": 0,
+    "gluc": 0,
+    "smoke": 0,
+    "alco": 0,
+    "active": 0,
+    "cardio": 0
+  },
+  "total_missing": 0,
+  "duplicate_rows": 0,
+  "target_column": "cardio",
+  "target_values": [
+    0,
+    1
+  ],
+  "class_distribution": {
+    "0": 35021,
+    "1": 34979
+  },
+  "class_percentages": {
+    "0": 50.03,
+    "1": 49.97
+  },
+  "numeric_columns": [
+    "id",
+    "age",
+    "gender",
+    "height",
+    "weight",
+    "ap_hi",
+    "ap_lo",
+    "cholesterol",
+    "gluc",
+    "smoke",
+    "alco",
+    "active",
+    "cardio"
+  ],
+  "identifier_columns": [
+    "id"
+  ],
+  "feature_columns": [
+    "age",
+    "gender",
+    "height",
+    "weight",
+    "ap_hi",
+    "ap_lo",
+    "cholesterol",
+    "gluc",
+    "smoke",
+    "alco",
+    "active"
+  ],
+  "column_semantics": {
+    "id": "Unique row identifier (NOT a predictor)",
+    "age": "Age in DAYS (integer)",
+    "gender": "1 = female, 2 = male (categorical)",
+    "height": "Height in cm",
+    "weight": "Weight in kg",
+    "ap_hi": "Systolic blood pressure (mmHg)",
+    "ap_lo": "Diastolic blood pressure (mmHg)",
+    "cholesterol": "1 = normal, 2 = above normal, 3 = well above normal",
+    "gluc": "1 = normal, 2 = above normal, 3 = well above normal",
+    "smoke": "0 = non-smoker, 1 = smoker",
+    "alco": "0 = no alcohol, 1 = alcohol intake",
+    "active": "0 = not physically active, 1 = physically active",
+    "cardio": "TARGET \u2014 0 = no CVD, 1 = CVD present"
+  },
+  "age_range_years": {
+    "min": 29.6,
+    "max": 64.9
+  },
+  "suspicious_counts": {
+    "height_outliers": 30,
+    "weight_outliers": 7,
+    "bp_negative_or_zero": 29,
+    "systolic_extreme": 228,
+    "diastolic_extreme": 1006,
+    "diastolic_gte_systolic": 1236
+  }
+}

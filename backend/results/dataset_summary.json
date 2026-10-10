@@ -1,0 +1,42 @@
+{
+  "total_rows_original": 70000,
+  "total_rows_after_cleaning": 68637,
+  "rows_removed": 1363,
+  "columns_original": 13,
+  "features_used": 14,
+  "feature_names": [
+    "age",
+    "gender",
+    "height",
+    "weight",
+    "ap_hi",
+    "ap_lo",
+    "cholesterol",
+    "gluc",
+    "smoke",
+    "alco",
+    "active",
+    "bmi",
+    "pulse_pressure",
+    "map"
+  ],
+  "target": "cardio",
+  "class_distribution": {
+    "0_no_cvd": 34682,
+    "1_cvd": 33955
+  },
+  "class_balance": 49.47,
+  "age_range": {
+    "min": 29.6,
+    "max": 64.9
+  },
+  "preprocessing_steps": [
+    "Dropped 'id' column",
+    "Converted age from days to years",
+    "Engineered BMI, pulse pressure, and MAP features",
+    "Removed medically implausible values",
+    "StandardScaler on numeric features (fit on train only)",
+    "OneHotEncoder on categorical features (drop='first')",
+    "Stratified 80/20 train/test split"
+  ]
+}

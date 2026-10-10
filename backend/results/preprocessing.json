@@ -1,0 +1,57 @@
+{
+  "original_rows": 71363,
+  "rows_after_cleaning": 68637,
+  "rows_removed": 1363,
+  "pct_removed": 1.95,
+  "feature_columns": [
+    "age",
+    "gender",
+    "height",
+    "weight",
+    "ap_hi",
+    "ap_lo",
+    "cholesterol",
+    "gluc",
+    "smoke",
+    "alco",
+    "active",
+    "bmi",
+    "pulse_pressure",
+    "map"
+  ],
+  "numeric_features": [
+    "age",
+    "height",
+    "weight",
+    "ap_hi",
+    "ap_lo",
+    "bmi",
+    "pulse_pressure",
+    "map",
+    "smoke",
+    "alco",
+    "active"
+  ],
+  "categorical_features": [
+    "gender",
+    "cholesterol",
+    "gluc"
+  ],
+  "target": "cardio",
+  "train_size": 54909,
+  "test_size": 13728,
+  "random_state": 42,
+  "engineered_features": [
+    "bmi",
+    "pulse_pressure",
+    "map"
+  ],
+  "cleaning_rules": {
+    "ap_hi": "60 \u2264 systolic \u2264 250",
+    "ap_lo": "30 \u2264 diastolic \u2264 200",
+    "ap_lo_lt_ap_hi": "diastolic < systolic",
+    "height": "100 \u2264 height \u2264 220",
+    "weight": "30 \u2264 weight \u2264 250",
+    "bmi": "10 \u2264 bmi \u2264 80"
+  }
+}

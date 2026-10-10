@@ -1,0 +1,211 @@
+{
+  "fields": [
+    {
+      "name": "age",
+      "display": "Age",
+      "type": "number",
+      "unit": "years",
+      "range": [
+        29,
+        65
+      ],
+      "plausible_range": [
+        18,
+        100
+      ],
+      "required": true,
+      "group": "Demographics"
+    },
+    {
+      "name": "gender",
+      "display": "Gender",
+      "type": "select",
+      "options": [
+        {
+          "value": 1,
+          "label": "Female"
+        },
+        {
+          "value": 2,
+          "label": "Male"
+        }
+      ],
+      "required": true,
+      "group": "Demographics"
+    },
+    {
+      "name": "height",
+      "display": "Height",
+      "type": "number",
+      "unit": "cm",
+      "range": [
+        100,
+        220
+      ],
+      "plausible_range": [
+        100,
+        250
+      ],
+      "required": true,
+      "group": "Demographics"
+    },
+    {
+      "name": "weight",
+      "display": "Weight",
+      "type": "number",
+      "unit": "kg",
+      "range": [
+        30,
+        250
+      ],
+      "plausible_range": [
+        20,
+        300
+      ],
+      "required": true,
+      "group": "Demographics"
+    },
+    {
+      "name": "ap_hi",
+      "display": "Systolic Blood Pressure",
+      "type": "number",
+      "unit": "mmHg",
+      "range": [
+        60,
+        250
+      ],
+      "plausible_range": [
+        60,
+        300
+      ],
+      "required": true,
+      "group": "Vitals"
+    },
+    {
+      "name": "ap_lo",
+      "display": "Diastolic Blood Pressure",
+      "type": "number",
+      "unit": "mmHg",
+      "range": [
+        30,
+        200
+      ],
+      "plausible_range": [
+        30,
+        200
+      ],
+      "required": true,
+      "group": "Vitals"
+    },
+    {
+      "name": "cholesterol",
+      "display": "Cholesterol Level",
+      "type": "select",
+      "options": [
+        {
+          "value": 1,
+          "label": "Normal"
+        },
+        {
+          "value": 2,
+          "label": "Above Normal"
+        },
+        {
+          "value": 3,
+          "label": "Well Above Normal"
+        }
+      ],
+      "required": true,
+      "group": "Blood Indicators"
+    },
+    {
+      "name": "gluc",
+      "display": "Glucose Level",
+      "type": "select",
+      "options": [
+        {
+          "value": 1,
+          "label": "Normal"
+        },
+        {
+          "value": 2,
+          "label": "Above Normal"
+        },
+        {
+          "value": 3,
+          "label": "Well Above Normal"
+        }
+      ],
+      "required": true,
+      "group": "Blood Indicators"
+    },
+    {
+      "name": "smoke",
+      "display": "Smoking",
+      "type": "select",
+      "options": [
+        {
+          "value": 0,
+          "label": "Non-smoker"
+        },
+        {
+          "value": 1,
+          "label": "Smoker"
+        }
+      ],
+      "required": true,
+      "group": "Lifestyle"
+    },
+    {
+      "name": "alco",
+      "display": "Alcohol Intake",
+      "type": "select",
+      "options": [
+        {
+          "value": 0,
+          "label": "No"
+        },
+        {
+          "value": 1,
+          "label": "Yes"
+        }
+      ],
+      "required": true,
+      "group": "Lifestyle"
+    },
+    {
+      "name": "active",
+      "display": "Physical Activity",
+      "type": "select",
+      "options": [
+        {
+          "value": 0,
+          "label": "Not Active"
+        },
+        {
+          "value": 1,
+          "label": "Active"
+        }
+      ],
+      "required": true,
+      "group": "Lifestyle"
+    }
+  ],
+  "derived_features": [
+    {
+      "name": "bmi",
+      "formula": "weight / (height/100)^2",
+      "description": "Body Mass Index"
+    },
+    {
+      "name": "pulse_pressure",
+      "formula": "ap_hi - ap_lo",
+      "description": "Pulse Pressure"
+    },
+    {
+      "name": "map",
+      "formula": "ap_lo + (ap_hi - ap_lo) / 3",
+      "description": "Mean Arterial Pressure"
+    }
+  ]
+}
