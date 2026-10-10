@@ -50,12 +50,9 @@ export default function App() {
     setLoading(true);
     setPatientData(data);
     try {
-      const [pred, expl] = await Promise.all([
-        api.predict(data),
-        api.explain(data),
-      ]);
+      const pred = await api.predict(data);
       setPrediction(pred);
-      setExplanation(expl);
+      setExplanation(pred);
     } catch (e) {
       alert(e.message);
     } finally {

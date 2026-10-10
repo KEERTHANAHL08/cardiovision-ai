@@ -108,34 +108,86 @@ def compute_risk(probability: float):
         category = "HIGH"
     return risk_index, category
 
-def compute_contributions(data: dict, prediction_prob: float):
-    contributions = []
+# ─── High-Performance Inference & Caching ─────────────────────────────────────
+PREDICTION_CACHE = {}
+
+def compute_contributions_fast(data: dict, prediction_prob: float):
     input_fields = ["age", "gender", "height", "weight", "ap_hi", "ap_lo",
                     "cholesterol", "gluc", "smoke", "alco", "active"]
+    rows = []
+    features = []
+    for f in input_fields:
+        if f in BASELINES:
+            mod = dict(data)
+            mod[f] = BASELINES[f]
+            mod["bmi"] = round(mod["weight"] / ((mod["height"] / 100) ** 2), 1)
+            mod["pulse_pressure"] = mod["ap_hi"] - mod["ap_lo"]
+            mod["map"] = round(mod["ap_lo"] + (mod["ap_hi"] - mod["ap_lo"]) / 3, 1)
+            rows.append([mod[k] for k in FEATURE_ORDER])
+            features.append(f)
 
-    for feature in input_fields:
-        if feature in BASELINES:
-            modified = dict(data)
-            modified[feature] = BASELINES[feature]
-            modified_df = prepare_input(modified)
-            try:
-                mod_prob = model.predict_proba(modified_df)[0][1]
-                contrib = prediction_prob - mod_prob
-            except Exception:
-                contrib = 0.0
+    batch_df = pd.DataFrame(rows, columns=FEATURE_ORDER)
+    try:
+        batch_probs = model.predict_proba(batch_df)[:, 1]
+    except Exception:
+        batch_probs = [prediction_prob] * len(features)
 
-            raw_val = data.get(feature)
-            direction = "increases model risk" if contrib > 0 else "decreases model risk"
-            contributions.append({
-                "feature": feature,
-                "display_name": FEATURE_DISPLAY_NAMES.get(feature, feature),
-                "value": raw_val,
-                "contribution": round(contrib, 4),
-                "direction": direction,
-            })
+    contributions = []
+    for f, mod_p in zip(features, batch_probs):
+        contrib = prediction_prob - float(mod_p)
+        raw_val = data.get(f)
+        direction = "increases model risk" if contrib > 0 else "decreases model risk"
+        contributions.append({
+            "feature": f,
+            "display_name": FEATURE_DISPLAY_NAMES.get(f, f),
+            "value": raw_val,
+            "contribution": round(contrib, 4),
+            "direction": direction,
+        })
 
     contributions.sort(key=lambda x: abs(x["contribution"]), reverse=True)
     return contributions
+
+def get_full_analysis(data: dict):
+    # Check cache
+    cache_key = json.dumps({k: data.get(k) for k in sorted(FEATURE_ORDER) if k in data})
+    if cache_key in PREDICTION_CACHE:
+        return PREDICTION_CACHE[cache_key]
+
+    input_df = prepare_input(data)
+    probability = float(model.predict_proba(input_df)[0][1])
+    prediction = int(probability >= 0.5)
+    risk_index, risk_category = compute_risk(probability)
+    contributors = compute_contributions_fast(data, probability)
+
+    increasing = [c for c in contributors if c["contribution"] > 0.001]
+    decreasing = [c for c in contributors if c["contribution"] < -0.001]
+    neutral = [c for c in contributors if -0.001 <= c["contribution"] <= 0.001]
+
+    result = {
+        "prediction": prediction,
+        "prediction_label": "CVD Risk Detected" if prediction == 1 else "Lower CVD Risk",
+        "model_probability": round(probability, 4),
+        "ai_risk_index": risk_index,
+        "risk_category": risk_category,
+        "top_contributors": contributors,
+        "all_contributors": contributors,
+        "risk_increasing_factors": increasing,
+        "risk_decreasing_factors": decreasing,
+        "neutral_factors": neutral,
+        "explanation_method": "Perturbation-based feature contribution (vectorized batch)",
+        "disclaimer": (
+            "This is an AI-based educational/research prototype and is not a medical "
+            "diagnostic tool. Predictions should not be used to make medical decisions. "
+            "Consult a qualified healthcare professional for clinical assessment."
+        ),
+    }
+
+    # Store in cache (keep last 100 entries)
+    if len(PREDICTION_CACHE) > 100:
+        PREDICTION_CACHE.pop(next(iter(PREDICTION_CACHE)))
+    PREDICTION_CACHE[cache_key] = result
+    return result
 
 # ─── API Endpoints ───────────────────────────────────────────────────────────
 
@@ -182,30 +234,12 @@ def predict():
     if not data:
         return jsonify({"detail": "No JSON payload provided"}), 400
 
-    # Validation
     if data.get("ap_lo", 0) >= data.get("ap_hi", 0):
         return jsonify({"detail": "Diastolic BP must be less than systolic BP"}), 422
 
     try:
-        input_df = prepare_input(data)
-        prediction = int(model.predict(input_df)[0])
-        probability = float(model.predict_proba(input_df)[0][1])
-        risk_index, risk_category = compute_risk(probability)
-        contributors = compute_contributions(data, probability)
-
-        return jsonify({
-            "prediction": prediction,
-            "prediction_label": "CVD Risk Detected" if prediction == 1 else "Lower CVD Risk",
-            "model_probability": round(probability, 4),
-            "ai_risk_index": risk_index,
-            "risk_category": risk_category,
-            "top_contributors": contributors,
-            "disclaimer": (
-                "This is an AI-based educational/research prototype and is not a medical "
-                "diagnostic tool. Predictions should not be used to make medical decisions. "
-                "Consult a qualified healthcare professional for clinical assessment."
-            ),
-        })
+        result = get_full_analysis(data)
+        return jsonify(result)
     except Exception as e:
         return jsonify({"detail": f"Prediction error: {str(e)}"}), 500
 
@@ -219,26 +253,8 @@ def explain():
         return jsonify({"detail": "No JSON payload provided"}), 400
 
     try:
-        input_df = prepare_input(data)
-        probability = float(model.predict_proba(input_df)[0][1])
-        risk_index, risk_category = compute_risk(probability)
-        contributors = compute_contributions(data, probability)
-
-        increasing = [c for c in contributors if c["contribution"] > 0.001]
-        decreasing = [c for c in contributors if c["contribution"] < -0.001]
-        neutral = [c for c in contributors if -0.001 <= c["contribution"] <= 0.001]
-
-        return jsonify({
-            "model_probability": round(probability, 4),
-            "ai_risk_index": risk_index,
-            "risk_category": risk_category,
-            "risk_increasing_factors": increasing,
-            "risk_decreasing_factors": decreasing,
-            "neutral_factors": neutral,
-            "all_contributors": contributors,
-            "explanation_method": "Perturbation-based feature contribution (baseline comparison)",
-            "disclaimer": "Feature contributions represent MODEL CONTRIBUTION to the prediction, NOT physical anatomical damage.",
-        })
+        result = get_full_analysis(data)
+        return jsonify(result)
     except Exception as e:
         return jsonify({"detail": f"Explanation error: {str(e)}"}), 500
 
